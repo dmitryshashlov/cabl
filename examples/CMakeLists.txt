@@ -12,4 +12,4 @@
 # Euklid - Euclidean sequencer ------------------------------------------------------------------- #
 add_subdirectory(device-test DeviceTest)
 add_subdirectory(euklid Euklid)
-#add_subdirectory(colordisplay ColorDisplay)
+add_subdirectory(f1plus F1Plus)
