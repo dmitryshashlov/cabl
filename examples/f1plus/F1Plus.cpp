@@ -92,7 +92,7 @@ void F1Plus::controlChanged(unsigned pot_, double value_, bool shiftPressed_)
 {
   M_LOG("[Client] controlChanged " << static_cast<int>(pot_) << " (" << value_ << ") "
                                    << (shiftPressed_ ? " SHIFT" : ""));
-
+  volumeTrack(pot_-4, value_ / 4);
   requestDeviceUpdate();
 }
 
@@ -136,5 +136,15 @@ void F1Plus::soloTrack(uint8_t track, bool solo)
     trackSolos[track] = solo;
     // send MIDI
 }
+
+//--------------------------------------------------------------------------------------------------
+
+void F1Plus::volumeTrack(uint8_t track, double volume)
+{
+    M_LOG("Volume track " << static_cast<int>(track + 1) << " (" << volume << ") ");
+
+    // send MIDI
+}
+
 
 } // namespace sl

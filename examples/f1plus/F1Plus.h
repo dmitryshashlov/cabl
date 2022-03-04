@@ -50,6 +50,9 @@ private:
 
   void toggleSoloTrack(uint8_t track);
   void soloTrack(uint8_t track, bool mute);
+
+  void volumeTrack(uint8_t track, double volume);
+
 };
 
 } // namespace sl
