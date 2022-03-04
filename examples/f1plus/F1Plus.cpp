@@ -152,7 +152,15 @@ void F1Plus::soloTrack(uint8_t track, bool solo)
     M_LOG("Solo track " << static_cast<int>(track + 1) << " (" << solo << ") ");
     trackSolos[track] = solo;
 
-    // TODO: send mutes to all tracks but this
+    // send mutes to all tracks but this
+    for (int i = 0 ; i < 4 ; i++) {
+        if ( i == track) {
+            muteTrack(i, false);
+            continue;
+        }
+        muteTrack(i, true);
+        trackSolos[track] = false;
+    }
 }
 
 //--------------------------------------------------------------------------------------------------
