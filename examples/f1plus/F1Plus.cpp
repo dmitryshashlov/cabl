@@ -39,7 +39,10 @@ using namespace std::placeholders;
 F1Plus::F1Plus()
   : m_pMidiout(new RtMidiOut)
 {
-  m_pMidiout->openVirtualPort("F1Plus");
+  for (uint8_t i = 0 ; i < m_pMidiout->getPortCount() ; i++ ) {
+    M_LOG("MIDI port: " << m_pMidiout->getPortName(i));
+  }
+  m_pMidiout->openVirtualPort("DemoF1");
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -133,7 +136,8 @@ void F1Plus::muteTrack(uint8_t track, bool mute)
 {
     M_LOG("Mute track " << static_cast<int>(track + 1) << " (" << mute << ") ");
     trackMutes[track] = mute;
-    // send MIDI
+
+    sendMIDIControlChangeMessage(5 + track, 94, mute ? 0 : 2);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -147,7 +151,8 @@ void F1Plus::soloTrack(uint8_t track, bool solo)
 {
     M_LOG("Solo track " << static_cast<int>(track + 1) << " (" << solo << ") ");
     trackSolos[track] = solo;
-    // send MIDI
+
+    // TODO: send mutes to all tracks but this
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -155,16 +160,24 @@ void F1Plus::soloTrack(uint8_t track, bool solo)
 void F1Plus::volumeTrack(uint8_t track, double volume)
 {
     M_LOG("Volume track " << static_cast<int>(track + 1) << " (" << volume << ") ");
-
-    // send MIDI
+    sendMIDIControlChangeMessage(5 + track, 95, 128 * volume);
 }
 
 void F1Plus::filterTrack(uint8_t track, double filter)
 {
     M_LOG("Filter track " << static_cast<int>(track + 1) << " (" << filter << ") ");
-
-    // send MIDI
+    sendMIDIControlChangeMessage(5 + track, 23, 128 * filter);
 }
 
+//--------------------------------------------------------------------------------------------------
+
+void F1Plus::sendMIDIControlChangeMessage(uint8_t channel, uint8_t cc, uint8_t data)
+{
+    M_LOG("Send MIDI CC message: ch " << static_cast<int>(channel) 
+                                      << " cc " << static_cast<int>(cc) 
+                                      << " val " << static_cast<int>(data));
+    std::vector<unsigned char> message = { 0xB0 + channel, cc, data };
+    m_pMidiout->sendMessage(&message);
+}
 
 } // namespace sl

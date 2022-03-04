@@ -54,6 +54,8 @@ private:
   void volumeTrack(uint8_t track, double volume);
   void filterTrack(uint8_t track, double filter);
 
+  void sendMIDIControlChangeMessage(uint8_t channel, uint8_t cc, uint8_t data);
+
 };
 
 } // namespace sl
