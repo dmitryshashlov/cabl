@@ -184,7 +184,7 @@ void F1Plus::sendMIDIControlChangeMessage(uint8_t channel, uint8_t cc, uint8_t d
     M_LOG("Send MIDI CC message: ch " << static_cast<int>(channel) 
                                       << " cc " << static_cast<int>(cc) 
                                       << " val " << static_cast<int>(data));
-    std::vector<unsigned char> message = { 0xB0 + channel, cc, data };
+    std::vector<unsigned char> message = { 0xB0 + channel - 1, cc, data };
     m_pMidiout->sendMessage(&message);
 }
 
