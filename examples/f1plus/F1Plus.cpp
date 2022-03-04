@@ -60,11 +60,12 @@ void F1Plus::render()
 
 void F1Plus::buttonChanged(Device::Button button_, bool buttonState_, bool shiftState_)
 {
+#ifdef DEBUG
   M_LOG("[Client] encoderChanged " << static_cast<int>(button_) << " ("
                                    << (buttonState_ ? "clicked " : "released")
                                    << ") "
                                    << (shiftState_ ? " SHIFT" : ""));
-
+#endif
   requestDeviceUpdate();
 }
 
@@ -72,8 +73,10 @@ void F1Plus::buttonChanged(Device::Button button_, bool buttonState_, bool shift
 
 void F1Plus::keyChanged(unsigned index_, double value_, bool shiftPressed_)
 {
+#ifdef DEBUG
   M_LOG("[Client] keyChanged " << static_cast<int>(index_) << " (" << value_ << ") "
                                << (shiftPressed_ ? " SHIFT" : ""));
+#endif
 
   if (value_ != 1) return;
 
@@ -90,9 +93,17 @@ void F1Plus::keyChanged(unsigned index_, double value_, bool shiftPressed_)
 
 void F1Plus::controlChanged(unsigned pot_, double value_, bool shiftPressed_)
 {
+#ifdef DEBUG
   M_LOG("[Client] controlChanged " << static_cast<int>(pot_) << " (" << value_ << ") "
                                    << (shiftPressed_ ? " SHIFT" : ""));
-  volumeTrack(pot_-4, value_ / 4);
+#endif
+
+  if (0 <= pot_ && pot_ < 4) {          // track filters
+      filterTrack(pot_, value_ / 4);
+  }
+  else if (4 <= pot_ && pot_ < 8) {     // track volumes
+      volumeTrack(pot_-4, value_ / 4);
+  }
   requestDeviceUpdate();
 }
 
@@ -120,6 +131,7 @@ void F1Plus::toggleMuteTrack(uint8_t track)
 
 void F1Plus::muteTrack(uint8_t track, bool mute)
 {
+    M_LOG("Mute track " << static_cast<int>(track + 1) << " (" << mute << ") ");
     trackMutes[track] = mute;
     // send MIDI
 }
@@ -133,6 +145,7 @@ void F1Plus::toggleSoloTrack(uint8_t track)
 
 void F1Plus::soloTrack(uint8_t track, bool solo)
 {
+    M_LOG("Solo track " << static_cast<int>(track + 1) << " (" << solo << ") ");
     trackSolos[track] = solo;
     // send MIDI
 }
@@ -142,6 +155,13 @@ void F1Plus::soloTrack(uint8_t track, bool solo)
 void F1Plus::volumeTrack(uint8_t track, double volume)
 {
     M_LOG("Volume track " << static_cast<int>(track + 1) << " (" << volume << ") ");
+
+    // send MIDI
+}
+
+void F1Plus::filterTrack(uint8_t track, double filter)
+{
+    M_LOG("Filter track " << static_cast<int>(track + 1) << " (" << filter << ") ");
 
     // send MIDI
 }
