@@ -199,7 +199,7 @@ void F1Plus::muteTrack(uint8_t track, bool mute)
 #endif
     trackMutes[track] = mute;
 
-    sendMIDIControlChangeMessage(5 + track, 94, mute ? 0 : 2);
+    sendMIDIControlChangeMessage(5 + track, 94, mute ? 2 : 0);
 }
 
 //--------------------------------------------------------------------------------------------------
