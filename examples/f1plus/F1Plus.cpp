@@ -58,12 +58,18 @@ using namespace std::placeholders;
 F1Plus::F1Plus()
   : m_pMidiout(new RtMidiOut)
 {
-#ifdef DEBUG
+#if defined(__APPLE__)
   for (uint8_t i = 0 ; i < m_pMidiout->getPortCount() ; i++ ) {
+#ifdef DEBUG
     M_LOG("MIDI port: " << m_pMidiout->getPortName(i));
-  }
 #endif
+    if (m_pMidiout->getPortName(i).compare("Midihub MH-0MRSSEG Port 1") == 0) {
+        m_pMidiout->openPort(i, "F1PlusMidiOut");
+    }
+  }
+#else
   m_pMidiout->openVirtualPort("F1PlusMidiOut");
+#endif
 }
 
 //--------------------------------------------------------------------------------------------------
