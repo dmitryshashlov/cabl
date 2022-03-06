@@ -182,7 +182,9 @@ void F1Plus::toggleMuteTrack(uint8_t track)
 
 void F1Plus::muteTrack(uint8_t track, bool mute)
 {
+#ifdef DEBUG
     M_LOG("Mute track " << static_cast<int>(track + 1) << " (" << mute << ") ");
+#endif
     trackMutes[track] = mute;
 
     sendMIDIControlChangeMessage(5 + track, 94, mute ? 0 : 2);
@@ -197,7 +199,9 @@ void F1Plus::toggleSoloTrack(uint8_t track)
 
 void F1Plus::soloTrack(uint8_t track, bool solo)
 {
+#ifdef DEBUG
     M_LOG("Solo track " << static_cast<int>(track + 1) << " (" << solo << ") ");
+#endif
     trackSolos[track] = solo;
 
     // send mutes to all tracks but this
@@ -215,13 +219,17 @@ void F1Plus::soloTrack(uint8_t track, bool solo)
 
 void F1Plus::volumeTrack(uint8_t track, double volume)
 {
+#ifdef DEBUG
     M_LOG("Volume track " << static_cast<int>(track + 1) << " (" << volume << ") ");
+#endif
     sendMIDIControlChangeMessage(5 + track, 95, 128 * volume);
 }
 
 void F1Plus::filterTrack(uint8_t track, double filter)
 {
+#ifdef DEBUG
     M_LOG("Filter track " << static_cast<int>(track + 1) << " (" << filter << ") ");
+#endif
     sendMIDIControlChangeMessage(5 + track, 23, 128 * filter);
 }
 
@@ -229,9 +237,11 @@ void F1Plus::filterTrack(uint8_t track, double filter)
 
 void F1Plus::sendMIDIControlChangeMessage(uint8_t channel, uint8_t cc, uint8_t data)
 {
+#ifdef DEBUG
     M_LOG("Send MIDI CC message: ch " << static_cast<int>(channel) 
                                       << " cc " << static_cast<int>(cc) 
                                       << " val " << static_cast<int>(data));
+#endif
     std::vector<unsigned char> message 
         = { static_cast<unsigned char>(MIDIMessageType_ControlChange + channel - 1), cc, data };
     m_pMidiout->sendMessage(&message);
@@ -241,9 +251,11 @@ void F1Plus::sendMIDIControlChangeMessage(uint8_t channel, uint8_t cc, uint8_t d
 
 void F1Plus::sendMIDINoteMessage(uint8_t channel, uint8_t note, bool on)
 {
+#ifdef DEBUG
     M_LOG("Send MIDI note message: ch " << static_cast<int>(channel) 
                                         << " note " << static_cast<int>(note) 
                                         << " " << on);
+#endif
     unsigned char velocity = 100;
     unsigned char messageType = on ? MIDIMessageType_NoteOn : MIDIMessageType_NoteOff;
     std::vector<unsigned char> message 

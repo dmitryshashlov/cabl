@@ -262,6 +262,8 @@ set (
 
 # Source files ----------------------------------------------------------------------------------- #
 
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
+
 set(
   src_client_SRCS
     src/client/Client.cpp
