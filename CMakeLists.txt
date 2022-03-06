@@ -6,7 +6,7 @@
 ##########      ############################################################# shaduzlabs.com #######
 
 cmake_minimum_required (VERSION 2.8.0)
-set (CMAKE_CXX_STANDARD 14)
+set (CMAKE_CXX_STANDARD 11)
 
 project (cabl)
 
@@ -461,12 +461,6 @@ set(
     ${src_gfx_SRCS}
     ${src_util_SRCS}
 )
-
-
-# All platforms ---------------------------------------------------------------------------------- #
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  include_directories( /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1/)
-endif()
 
 set(
   cabl_ALL
