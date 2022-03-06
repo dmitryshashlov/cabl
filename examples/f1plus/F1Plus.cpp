@@ -24,11 +24,13 @@ const sl::Color kColor_Blue = {0, 0, 60, 80};
 const sl::Color kColor_Purple = {35, 0, 60, 80};
 const sl::Color kColor_White = {60, 60, 60, 80};
 
-const unsigned char MIDIMessageType_ControlChange = 0xB0;
-const unsigned char MIDIMessageType_NoteOff = 0x80;
-const unsigned char MIDIMessageType_NoteOn = 0x90;
+enum MidiMessageType : unsigned char{
+    ControlChange = 0xB0,
+    NoteOff = 0x80,
+    NoteOn = 0x90,
+};
 
-enum MIDINote {
+enum MidiNote {
     C3 = 48,
     Cs3,
     D3,
@@ -41,6 +43,35 @@ enum MIDINote {
     A3,
     As3,
     B3
+};
+
+}
+
+namespace OT
+{
+
+enum MappingTarget {
+    REC_AB,
+    REC_CD,
+    REC_INT,
+    TRACK_UP,
+    TRACK_DOWN
+};
+
+std::map<MappingTarget, std::vector<unsigned char>> MidiMapping {
+    { REC_AB,       { MidiMessageType::NoteOn, MidiNote::Cs3,   1 } },
+    { REC_CD,       { MidiMessageType::NoteOn, MidiNote::D3,    1 } },
+    { REC_INT,      { MidiMessageType::NoteOn, MidiNote::Ds3,   1 } },
+    { TRACK_UP,     { MidiMessageType::NoteOn, MidiNote::Gs3,   1 } },
+    { TRACK_DOWN,   { MidiMessageType::NoteOn, MidiNote::A3,    1 } }
+};
+
+std::map<sl::Device::Button, MappingTarget> KeyMapping {
+    { sl::Device::Button::Sync,     REC_AB},
+    { sl::Device::Button::Quant,    REC_CD },
+    { sl::Device::Button::Capture,  REC_INT},
+    { sl::Device::Button::Reverse,  TRACK_UP },
+    { sl::Device::Button::Type,     TRACK_DOWN }
 };
 
 }
@@ -97,26 +128,7 @@ void F1Plus::buttonChanged(Device::Button button_, bool buttonState_, bool shift
                                    << (shiftState_ ? " SHIFT" : ""));
 #endif
 
-  switch (button_) {
-      case Device::Button::Sync:
-        sendMIDINoteMessage(1, MIDINote::Cs3, true);
-        break;
-      case Device::Button::Quant:
-        sendMIDINoteMessage(1, MIDINote::D3, true);
-        break;
-      case Device::Button::Capture:
-        sendMIDINoteMessage(1, MIDINote::Ds3, true);
-        break;
-      case Device::Button::Reverse:
-        sendMIDINoteMessage(1, MIDINote::Gs3, true);
-        break;
-      case Device::Button::Type:
-        sendMIDINoteMessage(1, MIDINote::A3, true);
-        break;
-      default:
-        break;
-  }
-
+  sendMIDIMessage(OT::MidiMapping[OT::KeyMapping[button_]]);
   requestDeviceUpdate();
 }
 
@@ -243,7 +255,7 @@ void F1Plus::sendMIDIControlChangeMessage(uint8_t channel, uint8_t cc, uint8_t d
                                       << " val " << static_cast<int>(data));
 #endif
     std::vector<unsigned char> message 
-        = { static_cast<unsigned char>(MIDIMessageType_ControlChange + channel - 1), cc, data };
+        = { static_cast<unsigned char>(MidiMessageType::ControlChange + channel - 1), cc, data };
     m_pMidiout->sendMessage(&message);
 }
 
@@ -257,9 +269,21 @@ void F1Plus::sendMIDINoteMessage(uint8_t channel, uint8_t note, bool on)
                                         << " " << on);
 #endif
     unsigned char velocity = 100;
-    unsigned char messageType = on ? MIDIMessageType_NoteOn : MIDIMessageType_NoteOff;
+    unsigned char messageType = on ? MidiMessageType::NoteOn : MidiMessageType::NoteOff;
     std::vector<unsigned char> message 
         = { static_cast<unsigned char>(messageType + channel - 1), note, velocity };
+    m_pMidiout->sendMessage(&message);
+}
+
+//--------------------------------------------------------------------------------------------------
+
+void F1Plus::sendMIDIMessage(std::vector<unsigned char> message)
+{
+#ifdef DEBUG
+    M_LOG("Send MIDI message: " << static_cast<int>(message[0]) 
+                                << " " << static_cast<int>(message[1]) 
+                                << " " << static_cast<int>(message[2]));
+#endif
     m_pMidiout->sendMessage(&message);
 }
 

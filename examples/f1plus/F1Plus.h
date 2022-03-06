@@ -56,6 +56,7 @@ private:
 
   void sendMIDIControlChangeMessage(uint8_t channel, uint8_t cc, uint8_t data);
   void sendMIDINoteMessage(uint8_t channel, uint8_t note, bool on);
+  void sendMIDIMessage(std::vector<unsigned char>);
 
 };
 
