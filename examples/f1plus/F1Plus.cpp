@@ -25,6 +25,23 @@ const sl::Color kColor_Purple = {35, 0, 60, 80};
 const sl::Color kColor_White = {60, 60, 60, 80};
 
 const unsigned char MIDIMessageType_ControlChange = 0xB0;
+const unsigned char MIDIMessageType_NoteOff = 0x80;
+const unsigned char MIDIMessageType_NoteOn = 0x90;
+
+enum MIDINote {
+    C3 = 48,
+    Cs3,
+    D3,
+    Ds3,
+    E3,
+    F3,
+    Fs3,
+    G3,
+    Gs3,
+    A3,
+    As3,
+    B3
+};
 
 }
 
@@ -68,11 +85,32 @@ void F1Plus::render()
 void F1Plus::buttonChanged(Device::Button button_, bool buttonState_, bool shiftState_)
 {
 #ifdef DEBUG
-  M_LOG("[Client] encoderChanged " << static_cast<int>(button_) << " ("
+  M_LOG("[Client] buttonChanged " << static_cast<int>(button_) << " ("
                                    << (buttonState_ ? "clicked " : "released")
                                    << ") "
                                    << (shiftState_ ? " SHIFT" : ""));
 #endif
+
+  switch (button_) {
+      case Device::Button::Sync:
+        sendMIDINoteMessage(1, MIDINote::Cs3, true);
+        break;
+      case Device::Button::Quant:
+        sendMIDINoteMessage(1, MIDINote::D3, true);
+        break;
+      case Device::Button::Capture:
+        sendMIDINoteMessage(1, MIDINote::Ds3, true);
+        break;
+      case Device::Button::Reverse:
+        sendMIDINoteMessage(1, MIDINote::Gs3, true);
+        break;
+      case Device::Button::Type:
+        sendMIDINoteMessage(1, MIDINote::A3, true);
+        break;
+      default:
+        break;
+  }
+
   requestDeviceUpdate();
 }
 
@@ -188,7 +226,22 @@ void F1Plus::sendMIDIControlChangeMessage(uint8_t channel, uint8_t cc, uint8_t d
     M_LOG("Send MIDI CC message: ch " << static_cast<int>(channel) 
                                       << " cc " << static_cast<int>(cc) 
                                       << " val " << static_cast<int>(data));
-    std::vector<unsigned char> message = { static_cast<unsigned char>(MIDIMessageType_ControlChange + channel - 1), cc, data };
+    std::vector<unsigned char> message 
+        = { static_cast<unsigned char>(MIDIMessageType_ControlChange + channel - 1), cc, data };
+    m_pMidiout->sendMessage(&message);
+}
+
+//--------------------------------------------------------------------------------------------------
+
+void F1Plus::sendMIDINoteMessage(uint8_t channel, uint8_t note, bool on)
+{
+    M_LOG("Send MIDI note message: ch " << static_cast<int>(channel) 
+                                        << " note " << static_cast<int>(note) 
+                                        << " " << on);
+    unsigned char velocity = 100;
+    unsigned char messageType = on ? MIDIMessageType_NoteOn : MIDIMessageType_NoteOff;
+    std::vector<unsigned char> message 
+        = { static_cast<unsigned char>(messageType + channel - 1), note, velocity };
     m_pMidiout->sendMessage(&message);
 }
 
