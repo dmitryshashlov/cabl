@@ -24,6 +24,8 @@ const sl::Color kColor_Blue = {0, 0, 60, 80};
 const sl::Color kColor_Purple = {35, 0, 60, 80};
 const sl::Color kColor_White = {60, 60, 60, 80};
 
+const unsigned char MIDIMessageType_ControlChange = 0xB0;
+
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -39,10 +41,12 @@ using namespace std::placeholders;
 F1Plus::F1Plus()
   : m_pMidiout(new RtMidiOut)
 {
+#ifdef DEBUG
   for (uint8_t i = 0 ; i < m_pMidiout->getPortCount() ; i++ ) {
     M_LOG("MIDI port: " << m_pMidiout->getPortName(i));
   }
-  m_pMidiout->openVirtualPort("DemoF1");
+#endif
+  m_pMidiout->openVirtualPort("F1PlusMidiOut");
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -184,7 +188,7 @@ void F1Plus::sendMIDIControlChangeMessage(uint8_t channel, uint8_t cc, uint8_t d
     M_LOG("Send MIDI CC message: ch " << static_cast<int>(channel) 
                                       << " cc " << static_cast<int>(cc) 
                                       << " val " << static_cast<int>(data));
-    std::vector<unsigned char> message = { 0xB0 + channel - 1, cc, data };
+    std::vector<unsigned char> message = { static_cast<unsigned char>(MIDIMessageType_ControlChange + channel - 1), cc, data };
     m_pMidiout->sendMessage(&message);
 }
 

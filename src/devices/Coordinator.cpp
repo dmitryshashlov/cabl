@@ -156,8 +156,10 @@ Coordinator::Coordinator()
   M_LOG("Controller Abstraction Library v. " << Lib::version());
   auto usbDriver = driver(Driver::Type::LibUSB);
 
+#if not defined(__APPLE__)
   usbDriver->setHotplugCallback(
     [this](DeviceDescriptor deviceDescriptor_, bool plugged_) { scan(); });
+#endif
 
   run();
 }
@@ -190,6 +192,7 @@ void Coordinator::scan()
   Driver::Type tMainDriver(Driver::Type::LibUSB);
 #endif
 
+#if defined(_WIN32) || defined(__linux)
   for (const auto& deviceDescriptor : driver(tMainDriver)->enumerate())
   {
     if (checkAndAddDeviceDescriptor(deviceDescriptor))
@@ -197,6 +200,7 @@ void Coordinator::scan()
       M_LOG("[Coordinator] scan: new device found via main driver");
     }
   }
+#endif
 
   std::sort(m_collDeviceDescriptors.begin(), m_collDeviceDescriptors.end());
 
