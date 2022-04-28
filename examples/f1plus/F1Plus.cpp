@@ -144,10 +144,14 @@ void F1Plus::keyChanged(unsigned index_, double value_, bool shiftPressed_)
   if (value_ != 1) return;
 
   uint8_t btn = static_cast<uint8_t>(index_);
-  if (4 <= btn && btn < 8) {            // track mutes
+  if (4 <= btn && btn < 8) {            // track mutes Analog Four
       toggleMuteTrack(7-btn);
-  } else if (0 <= btn && btn < 4) {     // track solos
+  } else if (0 <= btn && btn < 4) {     // track solos Analog Four
       toggleSoloTrack(3-btn);
+  } else if (12 <= btn && btn < 16) {   // track solos Digitone
+      toggleMuteTrack(15+4-btn);
+  } else if (8 <= btn && btn < 12) {    // track solos Digitone
+      toggleSoloTrack(11+4-btn);
   }
   requestDeviceUpdate();
 }
@@ -174,14 +178,24 @@ void F1Plus::controlChanged(unsigned pot_, double value_, bool shiftPressed_)
 
 void F1Plus::updatePads()
 {
-  // Digitone track mutes
+  // Analog Four track mutes
   for (uint8_t i = 0; i < 4; i++) {
-    device()->setKeyLed(i, trackMutes[i] ? kColor_Purple : kColor_Green);
+    device()->setKeyLed(i, trackMutes[i] ? kColor_Blue : kColor_Green);
+  }
+
+  // Analog Four track solos
+  for (uint8_t i = 4; i < 8; i++) {
+    device()->setKeyLed(i, kColor_White);
+  }
+
+  // Digitone track mutes
+  for (uint8_t i = 8; i < 12; i++) {
+    device()->setKeyLed(i, trackMutes[i-4] ? kColor_Purple : kColor_Green);
   }
 
   // Digitone track solos
-  for (uint8_t i = 4; i < 8; i++) {
-    device()->setKeyLed(i, trackSolos[i%4] ? kColor_Green : kColor_White);
+  for (uint8_t i = 12; i < 16; i++) {
+    device()->setKeyLed(i, kColor_White);
   }
 }
 
@@ -199,14 +213,14 @@ void F1Plus::muteTrack(uint8_t track, bool mute)
 #endif
     trackMutes[track] = mute;
 
-    sendMIDIControlChangeMessage(5 + track, 94, mute ? 2 : 0);
+    sendMIDIControlChangeMessage(1 + track, 94, mute ? 2 : 0);
 }
 
 //--------------------------------------------------------------------------------------------------
 
 void F1Plus::toggleSoloTrack(uint8_t track)
 {
-    soloTrack(track, !trackSolos[track]);
+    soloTrack(track, true);
 }
 
 void F1Plus::soloTrack(uint8_t track, bool solo)
@@ -214,16 +228,15 @@ void F1Plus::soloTrack(uint8_t track, bool solo)
 #ifdef DEBUG
     M_LOG("Solo track " << static_cast<int>(track + 1) << " (" << solo << ") ");
 #endif
-    trackSolos[track] = solo;
 
     // send mutes to all tracks but this
-    for (int i = 0 ; i < 4 ; i++) {
+    int indexStart = track >= 4 ? 4 : 0;
+    for (int i = indexStart ; i < indexStart + 4 ; i++) {
         if ( i == track) {
             muteTrack(i, false);
             continue;
         }
         muteTrack(i, true);
-        trackSolos[track] = false;
     }
 }
 

@@ -42,8 +42,8 @@ public:
 private:
   RtMidiOut* m_pMidiout;
 
-  std::array<bool, 4> trackMutes = { true, true, true, true };
-  std::array<bool, 4> trackSolos = { false, false, false, false };
+  std::array<bool, 8> trackMutes = { true, true, true, true, true, true, true, true};
+  std::array<bool, 8> trackSolos = { false, false, false, false, false, false, false, false};
 
   void toggleMuteTrack(uint8_t track);
   void muteTrack(uint8_t track, bool mute);
